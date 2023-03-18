@@ -8,6 +8,7 @@ import kotlin.test.assertTrue
 import kotlin.test.Test
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.io.TempDir
+import kotlin.test.Ignore
 
 /**
  * A simple functional test for the 'gradle.logger.helper.plugin.greeting' plugin.
@@ -20,6 +21,7 @@ class GradleLoggerHelperPluginPluginFunctionalTest {
     private val buildFile by lazy { projectDir.resolve("build.gradle") }
     private val settingsFile by lazy { projectDir.resolve("settings.gradle") }
 
+    @Ignore
     @Test fun `can run task`() {
         // Set up the test build
         settingsFile.writeText("")

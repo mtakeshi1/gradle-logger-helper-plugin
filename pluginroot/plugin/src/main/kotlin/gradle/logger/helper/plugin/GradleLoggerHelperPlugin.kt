@@ -3,28 +3,76 @@
  */
 package gradle.logger.helper.plugin
 
-import org.gradle.api.Project
 import org.gradle.api.Plugin
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.jvm.tasks.Jar
+import org.gradle.api.Project
+import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.compile.AbstractCompile
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.net.URLClassLoader
 
 /**
  * A simple 'hello world' plugin.
  */
 class GradleLoggerHelperPlugin : Plugin<Project> {
+
+
+    object GradleLoggerHelperPlugin {
+        private fun visitor(writer: ClassWriter, loggerConfig: LoggerEnhanceConfiguration): ClassVisitor {
+
+            TODO()
+        }
+
+        fun enhance(
+            input: File, dependenciesClassLoader: ClassLoader,
+            logger: Logger, loggerConfig: LoggerEnhanceConfiguration
+        ) {
+            logger.info("enhancing file: {}", input.absolutePath)
+            println("enhancing file: ${input.absolutePath}")
+            val out = BufferedInputStream(FileInputStream(input)).use {
+                val reader = ClassReader(it)
+                val writer = object : ClassWriter(COMPUTE_FRAMES) {
+                    override fun getClassLoader(): ClassLoader = dependenciesClassLoader
+                }
+                reader.accept(visitor(writer, loggerConfig), ClassReader.EXPAND_FRAMES)
+                writer.toByteArray()
+            }
+        }
+    }
+
+
     override fun apply(project: Project) {
-        // Register a task
-//        val x: Class<JavaPlugin> = typeOf<JavaPlugin>().javaClass
-        project.plugins.withType(JavaPlugin::class.java) { jp: JavaPlugin -> }
-        project.dependencies
-        project.tasks.withType(Jar::class.java) {jar -> }
+        val logger = project.logger
+
+        val loggerConfig = project.extensions.create("enhanceLogger", LoggerEnhanceConfiguration::class.java)
+
+        loggerConfig.getPackageNamePattern().convention("{packageName}")
+        loggerConfig.getClassNamePattern().convention("{className}")
+        loggerConfig.getMethodNamePattern().convention("{methodName}")
+        loggerConfig.getLineNumberPattern().convention("{lineNumber}")
+//        loggerConfig.getLoggerType().convention(LoggerType.ALL)
+
+        project.tasks.withType(AbstractCompile::class.java).forEach { compile ->
+            compile.doLast { _ ->
+                val classpath =
+                    project.configurations.getByName("compileClasspath").incoming.artifacts.artifactFiles.map {
+                        it.toURI().toURL()
+                    }
+                val classLoader = lazy { URLClassLoader(classpath.toTypedArray()) }
+                compile.outputs.files.asFileTree.files.filter { it.name.endsWith(".class") }.forEach {
+                    GradleLoggerHelperPlugin.enhance(it, classLoader.value, logger, loggerConfig)
+                }
+            }
+        }
         project.tasks.register("greeting") { task ->
             task.doLast {
-                println("Hello from plugin 'gradle.logger.helper.plugin.greeting' - aaaaa")
-                println("why doesnt this work")
+                println("Hello from plugin 'gradle.logger.helper.plugin.greeting'")
             }
 
         }
-
     }
 }

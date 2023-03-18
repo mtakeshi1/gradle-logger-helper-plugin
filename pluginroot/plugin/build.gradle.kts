@@ -21,6 +21,9 @@ repositories {
 dependencies {
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("commons-logging:commons-logging:1.2")
+    testImplementation("org.slf4j:slf4j-api:2.0.6")
+
     implementation(platform("org.ow2.asm:asm-bom:9.4"))
     implementation("org.ow2.asm:asm-tree")
     implementation("org.ow2.asm:asm-util")
