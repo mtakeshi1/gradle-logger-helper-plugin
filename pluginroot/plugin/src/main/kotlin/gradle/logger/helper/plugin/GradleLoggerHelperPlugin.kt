@@ -38,7 +38,7 @@ class GradleLoggerHelperPlugin : Plugin<Project> {
                 val writer = object : ClassWriter(COMPUTE_FRAMES) {
                     override fun getClassLoader(): ClassLoader = dependenciesClassLoader
                 }
-                reader.accept(visitor(writer, loggerConfig), ClassReader.EXPAND_FRAMES)
+//                reader.accept(visitor(writer, loggerConfig), ClassReader.EXPAND_FRAMES)
                 writer.toByteArray()
             }
         }

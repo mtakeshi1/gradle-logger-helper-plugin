@@ -27,6 +27,7 @@ dependencies {
     implementation(platform("org.ow2.asm:asm-bom:9.4"))
     implementation("org.ow2.asm:asm-tree")
     implementation("org.ow2.asm:asm-util")
+    implementation("org.ow2.asm:asm-commons")
 }
 
 gradlePlugin {
