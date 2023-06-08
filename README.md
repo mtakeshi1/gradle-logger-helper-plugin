@@ -13,7 +13,7 @@ LOGGER.debug(someMessage);
 into
 
 ```java
-LOGGER.isDebugEnabled()LOGGER.debug(someMessage);
+if(LOGGER.isDebugEnabled()) LOGGER.debug(someMessage);
 ```
 
 - modify string constants in the log messages, replaing special
